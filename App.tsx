@@ -5,114 +5,105 @@
  * @format
  */
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, {useEffect} from 'react';
+import {Button, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+
+import {useForegroundNotifications} from './src/useForegroundNotifications';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+  displayTestNotificationFullScreen,
+  StartForeGroundService,
+} from './src/ForegroundService';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import notifee, {
+  AndroidChannel,
+  AndroidImportance,
+} from '@notifee/react-native';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const channels: AndroidChannel[] = [
+  {
+    name: 'High Importance',
+    id: 'high',
+    importance: AndroidImportance.HIGH,
+    // sound: 'hollow',
+  },
+  {
+    name: 'Default Importance',
+    id: 'default',
+    importance: AndroidImportance.DEFAULT,
+  },
+  // {
+  //   name: 'Foreground Svc',
+  //   id: 'fgsvc',
+  //   // vibration: false,
+  //   importance: AndroidImportance.DEFAULT,
+  // },
+];
 
-function Section({children, title}: SectionProps): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const createNotifChannels = async () => {
+  // console.log('delete');
+  // await Promise.all(channels.map(ch => notifee.deleteChannel(ch.id)));
+  console.log('create');
+  return await Promise.all(channels.map(ch => notifee.createChannel(ch)));
+};
 
 function App(): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  useEffect(() => {
+    async function init() {
+      await notifee.requestPermission();
+      await createNotifChannels();
+    }
+    init();
+  }, []);
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  useForegroundNotifications();
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <SafeAreaView>
+      <View>
+        <Text>NotifeeTest</Text>
+      </View>
+      <View style={styles.buttonView}>
+        <Button
+          title="Display Notification"
+          onPress={() => displayTestNotification()}
+        />
+      </View>
+      <View style={styles.buttonView}>
+        <Button
+          title="Display Full scrren"
+          onPress={() => displayTestNotificationFullScreen()}
+        />
+      </View>
+      <View style={styles.buttonView}>
+        <Button
+          title="Run Foreground Service"
+          onPress={() => StartForeGroundService()}
+        />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  buttonView: {
+    marginTop: 20,
   },
 });
+
+const displayTestNotification = async () => {
+  await notifee.displayNotification({
+    title: 'Notification Title',
+    body: 'Main body content of the notification',
+    data: {mykey: 'myval'},
+    android: {
+      channelId: 'high',
+      pressAction: {
+        id: 'NotifeeTestId',
+        launchActivity: 'default',
+      },
+      importance: AndroidImportance.HIGH,
+    },
+  });
+};
 
 export default App;
