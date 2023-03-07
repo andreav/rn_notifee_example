@@ -1,7 +1,3 @@
-import notifee, {
-  AndroidChannel,
-  AndroidImportance,
-} from '@notifee/react-native';
 import {EventType} from '@notifee/react-native';
 
 export const dumpEventType = (eventType: EventType) => {

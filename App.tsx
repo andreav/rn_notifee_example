@@ -24,24 +24,20 @@ const channels: AndroidChannel[] = [
     name: 'High Importance',
     id: 'high',
     importance: AndroidImportance.HIGH,
-    // sound: 'hollow',
   },
   {
     name: 'Default Importance',
     id: 'default',
     importance: AndroidImportance.DEFAULT,
   },
-  // {
-  //   name: 'Foreground Svc',
-  //   id: 'fgsvc',
-  //   // vibration: false,
-  //   importance: AndroidImportance.DEFAULT,
-  // },
+  {
+    name: 'Foreground Svc',
+    id: 'low',
+    importance: AndroidImportance.LOW,
+  },
 ];
 
 const createNotifChannels = async () => {
-  // console.log('delete');
-  // await Promise.all(channels.map(ch => notifee.deleteChannel(ch.id)));
   console.log('create');
   return await Promise.all(channels.map(ch => notifee.createChannel(ch)));
 };

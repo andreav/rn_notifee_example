@@ -8,11 +8,10 @@ import notifee, {
 
 export async function StartForeGroundService() {
   return await notifee.displayNotification({
-    id: '123',
     title: 'Foreground service',
     body: 'This notification will exist for the lifetime of the service runner',
     android: {
-      channelId: 'default',
+      channelId: 'low',
       asForegroundService: true,
       ongoing: true,
       actions: [
@@ -72,7 +71,7 @@ export const ForegroundService = (notification: Notification) => {
       }
       if (detail?.pressAction?.id === 'stop') {
         console.warn('Stop action was pressed');
-        clearInterval(intervalId);
+        clearInterval(progressBarIntervalId);
         await notifee.cancelNotification(fullScreenNotifId);
         await stopService();
       }
@@ -80,10 +79,10 @@ export const ForegroundService = (notification: Notification) => {
     notifee.onForegroundEvent(handleStopActionEvent);
     notifee.onBackgroundEvent(handleStopActionEvent);
 
-    let intervalId: number;
-    async function updateInProgressNotif() {
+    let progressBarIntervalId: number;
+    async function updateProgressBar() {
       let current = 1;
-      intervalId = setInterval(async () => {
+      progressBarIntervalId = setInterval(async () => {
         console.log(current);
         console.log(current % 10);
 
@@ -100,10 +99,10 @@ export const ForegroundService = (notification: Notification) => {
         });
         current++;
       }, 1000);
-      return intervalId;
+      return progressBarIntervalId;
     }
 
-    // updateInProgressNotif();
+    updateProgressBar();
 
     let fullScreenNotifId: string;
     setTimeout(async () => {
