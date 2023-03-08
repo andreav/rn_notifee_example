@@ -17,7 +17,7 @@ import notifee, {
 import {
   displayNotificationFullScreenTest,
   StartForeGroundServiceTest,
-  StopForeGroundServiceTest,
+  ManuallyStopForeGroundServiceTest,
 } from './src/ForegroundServiceTest';
 
 const channels: AndroidChannel[] = [
@@ -35,6 +35,11 @@ const channels: AndroidChannel[] = [
     name: 'Foreground Svc',
     id: 'low',
     importance: AndroidImportance.LOW,
+  },
+  {
+    name: 'Min Importance',
+    id: 'min',
+    importance: AndroidImportance.MIN,
   },
 ];
 
@@ -79,8 +84,8 @@ function App(): JSX.Element {
       </View>
       <View style={styles.buttonView}>
         <Button
-          title="Run Foreground Service"
-          onPress={() => StopForeGroundServiceTest()}
+          title="Stop Foreground Service"
+          onPress={() => ManuallyStopForeGroundServiceTest()}
         />
       </View>
     </SafeAreaView>
@@ -97,12 +102,16 @@ const displayTestNotification = async () => {
   await notifee.displayNotification({
     title: 'Notification Title',
     body: 'Main body content of the notification',
-    data: {mykey: 'myval'},
     android: {
       channelId: 'high',
       pressAction: {
         id: 'NotifeeTestId',
         launchActivity: 'default',
+      },
+      progress: {
+        max: 10,
+        current: 0,
+        indeterminate: true,
       },
       importance: AndroidImportance.HIGH,
     },

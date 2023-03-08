@@ -2,14 +2,12 @@ import notifee, {
   AndroidCategory,
   AndroidImportance,
   Notification,
+  Event,
+  EventType,
 } from '@notifee/react-native';
-import {
-  handleStopActionEvent,
-  UpdateNotifData,
-  updateNotificationProgressBar_Loop,
-} from './ForegroundServiceUtils';
 
 const FGSvcNotifId = 'FGSVC_TEST';
+const FGSvcStopActionId = 'stop_fgsvc';
 
 export async function StartForeGroundServiceTest() {
   console.log('StartForeGroundServiceTest');
@@ -22,6 +20,11 @@ export async function StartForeGroundServiceTest() {
       channelId: 'low',
       asForegroundService: true,
       ongoing: true,
+      progress: {
+        max: 10,
+        current: 0,
+        indeterminate: true,
+      },
       actions: [
         {
           title: 'Stop',
@@ -34,36 +37,40 @@ export async function StartForeGroundServiceTest() {
   });
 }
 
-export async function StopForeGroundServiceTest() {
-  console.log('StopForeGroundServiceTest');
-  return await notifee.cancelNotification(FGSvcNotifId);
+export async function CheckStopForegroundServiceTest(event: Event) {
+  console.log('OnEventStopForeGroundServiceTest');
+  if (
+    event.type === EventType.ACTION_PRESS &&
+    event.detail?.pressAction?.id === FGSvcStopActionId
+  ) {
+    await notifee.cancelNotification('Full-screen');
+    await notifee.stopForegroundService();
+  }
 }
 
-export function ForegrounServiceTest(notification: Notification) {
+export async function ManuallyStopForeGroundServiceTest() {
+  console.log('ManuallyStopForeGroundServiceTest');
+  await notifee.cancelNotification('Full-screen');
+  await notifee.stopForegroundService();
+}
+
+export function BuildForegrounServiceTest(notification: Notification) {
   console.log(
     `-- ForegroundService: creating ForegrounServiceTest - Notif id: ${notification?.id}`,
   );
 
-  return new Promise<void>(resolve => {
+  return new Promise<void>(() => {
     console.log('-- ForegroundService: inside ForegrounServiceTest');
 
-    notifee.onForegroundEvent(handleStopActionEvent(resolve, notification));
-    notifee.onBackgroundEvent(handleStopActionEvent(resolve, notification));
-
-    // let progressBarIntervalId: NodeJS.Timer =
-    updateNotificationProgressBar_Loop(notification);
-
-    // let fullScreenNotifId: string;
     setTimeout(async () => {
-      const fullScreenNotifId = await displayNotificationFullScreenTest();
-      UpdateNotifData(notification, {fullScreenNotifId});
-      console.log('noitfffffffffffffffff', JSON.stringify(notification));
+      await displayNotificationFullScreenTest();
     }, 5000);
   });
 }
 
 export async function displayNotificationFullScreenTest() {
   return await notifee.displayNotification({
+    id: 'Full-screen',
     title: 'Full-screen',
     android: {
       asForegroundService: false,
@@ -73,7 +80,6 @@ export async function displayNotificationFullScreenTest() {
       importance: AndroidImportance.HIGH,
       fullScreenAction: {
         id: 'default',
-        // mainComponent: 'full_screen',
       },
     },
   });

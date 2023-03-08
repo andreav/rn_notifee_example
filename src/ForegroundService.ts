@@ -1,5 +1,5 @@
 import {Notification} from '@notifee/react-native';
-import {ForegrounServiceTest} from './ForegroundServiceTest';
+import {BuildForegrounServiceTest} from './ForegroundServiceTest';
 
 /*
  * This FG Service handles multiple Services
@@ -9,7 +9,7 @@ export const ForegroundService = (notification: Notification) => {
 
   switch (notification.id) {
     case 'FGSVC_TEST':
-      return ForegrounServiceTest(notification);
+      return BuildForegrounServiceTest(notification);
 
     // case 'FGSVC_OTHER':
     //   return ForegroundServiceOther(notification);
