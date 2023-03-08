@@ -9,15 +9,16 @@ import React, {useEffect} from 'react';
 import {Button, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 
 import {useForegroundNotifications} from './src/useForegroundNotifications';
-import {
-  displayTestNotificationFullScreen,
-  StartForeGroundService,
-} from './src/ForegroundService';
 
 import notifee, {
   AndroidChannel,
   AndroidImportance,
 } from '@notifee/react-native';
+import {
+  displayNotificationFullScreenTest,
+  StartForeGroundServiceTest,
+  StopForeGroundServiceTest,
+} from './src/ForegroundServiceTest';
 
 const channels: AndroidChannel[] = [
   {
@@ -67,13 +68,19 @@ function App(): JSX.Element {
       <View style={styles.buttonView}>
         <Button
           title="Display Full scrren"
-          onPress={() => displayTestNotificationFullScreen()}
+          onPress={() => displayNotificationFullScreenTest()}
         />
       </View>
       <View style={styles.buttonView}>
         <Button
           title="Run Foreground Service"
-          onPress={() => StartForeGroundService()}
+          onPress={() => StartForeGroundServiceTest()}
+        />
+      </View>
+      <View style={styles.buttonView}>
+        <Button
+          title="Run Foreground Service"
+          onPress={() => StopForeGroundServiceTest()}
         />
       </View>
     </SafeAreaView>
