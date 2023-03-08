@@ -1,112 +1,23 @@
-import notifee, {
-  AndroidCategory,
-  AndroidImportance,
-  EventDetail,
-  EventType,
-  Notification,
-} from '@notifee/react-native';
+import {Notification} from '@notifee/react-native';
+import {BuildForegrounServiceTest} from './ForegroundServiceTest';
 
-export async function StartForeGroundService() {
-  return await notifee.displayNotification({
-    title: 'Foreground service',
-    body: 'This notification will exist for the lifetime of the service runner',
-    android: {
-      channelId: 'low',
-      asForegroundService: true,
-      ongoing: true,
-      actions: [
-        {
-          title: 'Stop',
-          pressAction: {
-            id: 'stop',
-          },
-        },
-      ],
-    },
-  });
-}
-
-export async function displayTestNotificationFullScreen() {
-  return await notifee.displayNotification({
-    title: 'Full-screen',
-    android: {
-      asForegroundService: false,
-      channelId: 'high',
-      autoCancel: false,
-      category: AndroidCategory.CALL,
-      importance: AndroidImportance.HIGH,
-      fullScreenAction: {
-        id: 'default',
-        // mainComponent: 'full_screen',
-      },
-    },
-  });
-}
-
+/*
+ * This FG Service handles multiple Services
+ */
 export const ForegroundService = (notification: Notification) => {
-  console.log(`-- ForegroundService: ${JSON.stringify(notification)}`);
+  console.log(`-- ForegroundService: notification.id: ${notification.id}`);
 
-  return new Promise<void>(resolve => {
-    console.log(
-      `-- ForegroundService: inside promise Notif id: ${notification?.id}`,
-    );
+  switch (notification.id) {
+    case 'FGSVC_TEST':
+      return BuildForegrounServiceTest(notification);
 
-    async function stopService(): Promise<void> {
-      console.warn('Stopping service.');
-      if (notification.id) {
-        await notifee.cancelNotification(notification?.id);
-      }
-      return resolve();
-    }
+    // case 'FGSVC_OTHER':
+    //   return ForegroundServiceOther(notification);
 
-    async function handleStopActionEvent({
-      type,
-      detail,
-    }: {
-      type: EventType;
-      detail: EventDetail;
-    }): Promise<void> {
-      if (type !== EventType.ACTION_PRESS) {
-        return;
-      }
-      if (detail?.pressAction?.id === 'stop') {
-        console.warn('Stop action was pressed');
-        clearInterval(progressBarIntervalId);
-        await notifee.cancelNotification(fullScreenNotifId);
-        await stopService();
-      }
-    }
-    notifee.onForegroundEvent(handleStopActionEvent);
-    notifee.onBackgroundEvent(handleStopActionEvent);
-
-    let progressBarIntervalId: number;
-    async function updateProgressBar() {
-      let current = 1;
-      progressBarIntervalId = setInterval(async () => {
-        console.log(current);
-        console.log(current % 10);
-
-        notifee.displayNotification({
-          id: notification.id,
-          body: notification.body,
-          android: {
-            ...notification.android,
-            progress: {
-              max: 10,
-              current: current % 10,
-            },
-          },
-        });
-        current++;
-      }, 1000);
-      return progressBarIntervalId;
-    }
-
-    updateProgressBar();
-
-    let fullScreenNotifId: string;
-    setTimeout(async () => {
-      fullScreenNotifId = await displayTestNotificationFullScreen();
-    }, 5000);
-  });
+    default:
+      console.error(
+        `ForegroundService - notification id not forseen ${notification.id}`,
+      );
+      break;
+  }
 };
